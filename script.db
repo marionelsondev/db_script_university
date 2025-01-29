@@ -1,5 +1,4 @@
 CREATE DATABASE universidade_brasileira;
-USE universidade_brasileira;
 
 CREATE TABLE estado (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -8,7 +7,7 @@ CREATE TABLE estado (
 );
 
 CREATE TABLE cidade (
-    id INT AUTO_INCREMENT PRIMARY_KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL UNIQUE,
     sigla VARCHAR(5) NOT NULL UNIQUE,
     id_estado INT NOT NULL,
@@ -29,7 +28,7 @@ CREATE TABLE aluno (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     cpf VARCHAR(11) NOT NULL UNIQUE,
-    data_nascimento DATEE NOT NULL,
+    data_nascimento DATE NOT NULL,
     contato VARCHAR(11) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     sexo ENUM('MASCULINO', 'FEMININO') NOT NULL,
@@ -49,4 +48,74 @@ CREATE TABLE professor (
     ativo TINYINT NOT NULL DEFAULT 1,
     id_endereco INT NOT NULL,
     FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+);
+
+CREATE TABLE curso (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL UNIQUE,
+    sigla VARCHAR(8) NOT NULL UNIQUE,
+    carga_horaria INT NOT NULL,
+    duracao INT NOT NULL,
+    tipo ENUM('GRADUAÇÃO', 'PÓS-GRADUAÇÃO (LATO SENSU)', 'PÓS-GRADUAÇÃO (STRICTO SENSU)', 'TÉCNICO', 'EXTENSÃO', 'LIVRE', 'PROFISSIONALIZANTE') NOT NULL,
+    modalidade ENUM('PRESENCIAL', 'ONLINE(EAD)', 'HÍBRIDO (SEMIPRESENCIAL)', 'REMOTO', 'FLEXÍVEL') NOT NULL,
+    valor_mensalidade DECIMAL(10, 2) NOT NULL,
+    status ENUM('ATIVO', 'INATIVO', 'EM PLANEJAMENTO', 'SUSPENSO TEMPORARIAMENTE', 'DESCONTINUADO', 'AGUARDANDO APROVAÇÃO', 'EM REFORMULAÇÃO') NOT NULL
+);
+
+CREATE TABLE matricula (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(45) NOT NULL UNIQUE,
+    data_matricula DATE NOT NULL,
+    situacao ENUM('ATIVA', 'INATIVA', 'TRANCADA', 'CANCELADA', 'CONCLUÍDA', 'AGUARDANDO PAGAMENTO', 'SUSPENSA', 'EM PROCESSAMENTO'),
+    desconto INT NOT NULL,
+    id_aluno INT NOT NULL,
+    id_curso INT NOT NULL,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id),
+    FOREIGN KEY (id_curso) REFERENCES curso(id)
+);
+
+CREATE TABLE materia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL UNIQUE,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    carga_horaria INT NOT NULL,
+    tipo ENUM('OBRIGATÓRIA', 'OPTATIVA', 'ELETIVA', 'PRÁTICA', 'TRABALHO DE CONCLUSÃO DE CURSO (TCC)', 'ESTÁGIO SUPERVISIONADO', 'PROJETO INTEGRADOR') NOT NULL,
+    modalidade ENUM('PRESENCIAL', 'ONLINE (EAD)', 'HÍBRIDA', 'REMOTA SÍNCRONA', 'INTENSIVA') NOT NULL,
+    status ENUM('ATIVA', 'INATIVA', 'EM REFORMULAÇÃO', 'DESCONTINUADA', 'AGUARDANDO APROVAÇÃO', 'SUSPENSA TEMPORARIAMENTE') NOT NULL
+);
+
+CREATE TABLE nota (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    valor DECIMAL(2,1) NOT NULL,
+    tipo ENUM('PROVA', 'TRABALHO', 'SEMINÁRIO', 'PARTICIPAÇÃO', 'PROJETO', 'EXAME FINAL', 'AVALIAÇÃO ONLINE', 'PORTFÓLIO') NOT NULL,
+    data_avaliacao DATE NOT NULL,
+    id_matricula INT NOT NULL,
+    id_materia INT NOT NULL,
+    FOREIGN KEY (id_matricula) REFERENCES matricula(id),
+    FOREIGN KEY (id_materia) REFERENCES materia(id)
+);
+
+CREATE TABLE materia_curso (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_materia INT NOT NULL,
+    id_curso INT NOT NULL,
+    FOREIGN KEY (id_materia) REFERENCES materia(id),
+    FOREIGN KEY (id_curso) REFERENCES curso(id)
+);
+
+CREATE TABLE turma (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    turno ENUM('MATUTINO', 'VESPERTINO', 'NOTURNO') NOT NULL,
+    total_vaga INT NOT NULL,
+    data_inicio DATE NOT NULL,
+    data_fim DATE NOT NULL,
+    status ENUM('ATIVO', 'SUSPENSO', 'FINALIZADO') NOT NULL
+);
+
+CREATE TABLE matricula_turma (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_matricula INT NOT NULL,
+    id_turma INT NOT NULL,
+    FOREIGN KEY (id_matricula) REFERENCES matricula(id),
+    FOREIGN KEY (id_turma) REFERENCES turma(id)
 );
