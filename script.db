@@ -1,1 +1,52 @@
-CREATE DATABASE brazilian_university;
+CREATE DATABASE universidade_brasileira;
+USE universidade_brasileira;
+
+CREATE TABLE estado (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    sigla VARCHAR(2) NOT NULL UNIQUE
+);
+
+CREATE TABLE cidade (
+    id INT AUTO_INCREMENT PRIMARY_KEY,
+    nome VARCHAR(100) NOT NULL UNIQUE,
+    sigla VARCHAR(5) NOT NULL UNIQUE,
+    id_estado INT NOT NULL,
+    FOREIGN KEY (id_estado) REFERENCES estado(id)
+);
+
+CREATE TABLE endereco (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rua VARCHAR(100) NOT NULL,
+    bairro VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    cep VARCHAR(8) NOT NULL,
+    id_cidade INT NOT NULL,
+    FOREIGN KEY (id_cidade) REFERENCES cidade(id)
+);
+
+CREATE TABLE aluno (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    data_nascimento DATEE NOT NULL,
+    contato VARCHAR(11) NOT NULL,
+    email VARCHAR(320) NOT NULL UNIQUE,
+    sexo ENUM('MASCULINO', 'FEMININO') NOT NULL,
+    ativo TINYINT NOT NULL DEFAULT 1,
+    id_endereco INT NOT NULL,
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+);
+
+CREATE TABLE professor (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    data_nascimento DATE NOT NULL,
+    contato VARCHAR(11) NOT NULL,
+    email VARCHAR(320) NOT NULL UNIQUE,
+    sexo ENUM('MASCULINO', 'FEMININO') NOT NULL,
+    ativo TINYINT NOT NULL DEFAULT 1,
+    id_endereco INT NOT NULL,
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+);
