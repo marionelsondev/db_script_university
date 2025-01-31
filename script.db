@@ -24,7 +24,7 @@ CREATE TABLE endereco (
     FOREIGN KEY (id_cidade) REFERENCES cidade(id)
 );
 
-CREATE TABLE aluno (
+CREATE TABLE pessoa (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     cpf VARCHAR(11) NOT NULL UNIQUE,
@@ -32,46 +32,20 @@ CREATE TABLE aluno (
     contato VARCHAR(11) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     sexo ENUM('MASCULINO', 'FEMININO') NOT NULL,
-    ativo TINYINT NOT NULL DEFAULT 1,
     id_endereco INT NOT NULL,
     FOREIGN KEY (id_endereco) REFERENCES endereco(id)
 );
 
 CREATE TABLE professor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    cpf VARCHAR(11) NOT NULL UNIQUE,
-    data_nascimento DATE NOT NULL,
-    contato VARCHAR(11) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    sexo ENUM('MASCULINO', 'FEMININO') NOT NULL,
+    id_pessoa INT PRIMARY KEY,
     ativo TINYINT NOT NULL DEFAULT 1,
-    id_endereco INT NOT NULL,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id)
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id)
 );
 
-CREATE TABLE curso (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL UNIQUE,
-    sigla VARCHAR(8) NOT NULL UNIQUE,
-    carga_horaria INT NOT NULL,
-    duracao INT NOT NULL,
-    tipo ENUM('GRADUAÇÃO', 'PÓS-GRADUAÇÃO (LATO SENSU)', 'PÓS-GRADUAÇÃO (STRICTO SENSU)', 'TÉCNICO', 'EXTENSÃO', 'LIVRE', 'PROFISSIONALIZANTE') NOT NULL,
-    modalidade ENUM('PRESENCIAL', 'ONLINE(EAD)', 'HÍBRIDO (SEMIPRESENCIAL)', 'REMOTO', 'FLEXÍVEL') NOT NULL,
-    valor_mensalidade DECIMAL(10, 2) NOT NULL,
-    status ENUM('ATIVO', 'INATIVO', 'EM PLANEJAMENTO', 'SUSPENSO TEMPORARIAMENTE', 'DESCONTINUADO', 'AGUARDANDO APROVAÇÃO', 'EM REFORMULAÇÃO') NOT NULL
-);
-
-CREATE TABLE matricula (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-    codigo VARCHAR(45) NOT NULL UNIQUE,
-    data_matricula DATE NOT NULL,
-    situacao ENUM('ATIVA', 'INATIVA', 'TRANCADA', 'CANCELADA', 'CONCLUÍDA', 'AGUARDANDO PAGAMENTO', 'SUSPENSA', 'EM PROCESSAMENTO'),
-    desconto INT NOT NULL,
-    id_aluno INT NOT NULL,
-    id_curso INT NOT NULL,
-    FOREIGN KEY (id_aluno) REFERENCES aluno(id),
-    FOREIGN KEY (id_curso) REFERENCES curso(id)
+CREATE TABLE aluno (
+    id_pessoa INT PRIMARY KEY,
+    ativo TINYINT NOT NULL DEFAULT 1,
+    FOREIGN KEY (id_pessoa) REFERENCES pessoa(id)
 );
 
 CREATE TABLE materia (
@@ -84,15 +58,24 @@ CREATE TABLE materia (
     status ENUM('ATIVA', 'INATIVA', 'EM REFORMULAÇÃO', 'DESCONTINUADA', 'AGUARDANDO APROVAÇÃO', 'SUSPENSA TEMPORARIAMENTE') NOT NULL
 );
 
-CREATE TABLE nota (
+CREATE TABLE professor_materia (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    valor DECIMAL(2,1) NOT NULL,
-    tipo ENUM('PROVA', 'TRABALHO', 'SEMINÁRIO', 'PARTICIPAÇÃO', 'PROJETO', 'EXAME FINAL', 'AVALIAÇÃO ONLINE', 'PORTFÓLIO') NOT NULL,
-    data_avaliacao DATE NOT NULL,
-    id_matricula INT NOT NULL,
     id_materia INT NOT NULL,
-    FOREIGN KEY (id_matricula) REFERENCES matricula(id),
-    FOREIGN KEY (id_materia) REFERENCES materia(id)
+    id_professor INT NOT NULL,
+    FOREIGN KEY (id_materia) REFERENCES materia(id),
+    FOREIGN KEY (id_professor) REFERENCES professor(id_pessoa)
+);
+
+CREATE TABLE curso (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL UNIQUE,
+    sigla VARCHAR(8) NOT NULL UNIQUE,
+    carga_horaria INT NOT NULL,
+    duracao INT NOT NULL,
+    tipo ENUM('GRADUAÇÃO', 'PÓS-GRADUÇÃO (LATO SENSU)', 'PÓS-GRADUÇÃO (STRICTO SENSU)', 'TÉCNICO', 'EXTENSÃO', 'LIVRE', 'PROFISSIONALIZANTE') NOT NULL,
+    modalidade ENUM('PRESENCIAL', 'ONLINE (EAD)', 'HÍBRIDO (SEMIPRESENCIAL)', 'REMOTO', 'FLEXÍVEL') NOT NULL,
+    valor_mensalidade DECIMAL(10,2) NOT NULL,
+    status ENUM('ATIVO', 'INATIVO', 'EM PLANEJAMENTO', 'SUSPENSO TEMPORARIAMENTE', 'DESCONTINUADO', 'AGUARDANDO APROVAÇÃO', 'EM REFORMULAÇÃO') NOT NULL
 );
 
 CREATE TABLE materia_curso (
@@ -103,13 +86,38 @@ CREATE TABLE materia_curso (
     FOREIGN KEY (id_curso) REFERENCES curso(id)
 );
 
+CREATE TABLE matricula (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(45) NOT NULL UNIQUE,
+    data_matricula DATE NOT NULL,
+    situacao ENUM('ATIVA', 'INATIVA', 'TRANCADA', 'CANCELADA', 'CONCLUÍDA', 'AGUARDANDO PAGAMENTO', 'SUSPENSA', 'EM PROCESSAMENTO') NOT NULL,
+    desconto DECIMAL(4,2) NOT NULL,
+    id_aluno INT NOT NULL,
+    id_curso INT NOT NULL,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id_pessoa),
+    FOREIGN KEY (id_curso) REFERENCES curso(id)
+);
+
+CREATE TABLE nota (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    valor DECIMAL(3,1) NOT NULL,
+    tipo ENUM('PROVA', 'TRABALHO', 'SEMINÁRIO', 'PARTICIPAÇÃO', 'PROJETO', 'EXAME FINAL', 'AVALIAÇÃO ONLINE', 'PORTFÓLIO') NOT NULL,
+    data_avaliacao DATE NOT NULL,
+    id_matricula INT NOT NULL,
+    id_materia INT NOT NULL,
+    FOREIGN KEY (id_matricula) REFERENCES matricula(id),
+    FOREIGN KEY (id_materia) REFERENCES materia(id)
+);
+
 CREATE TABLE turma (
     id INT AUTO_INCREMENT PRIMARY KEY,
     turno ENUM('MATUTINO', 'VESPERTINO', 'NOTURNO') NOT NULL,
     total_vaga INT NOT NULL,
     data_inicio DATE NOT NULL,
     data_fim DATE NOT NULL,
-    status ENUM('ATIVO', 'SUSPENSO', 'FINALIZADO') NOT NULL
+    status ENUM('ATIVO', 'SUSPENSO', 'FINALIZADO') NOT NULL,
+    id_curso INT NOT NULL,
+    FOREIGN KEY (id_curso) REFERENCES curso(id)
 );
 
 CREATE TABLE matricula_turma (
@@ -118,4 +126,24 @@ CREATE TABLE matricula_turma (
     id_turma INT NOT NULL,
     FOREIGN KEY (id_matricula) REFERENCES matricula(id),
     FOREIGN KEY (id_turma) REFERENCES turma(id)
+);
+
+CREATE TABLE pagamento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    valor DECIMAL(10,2) NOT NULL,
+    data_vencimento DATE NOT NULL,
+    data_pagamento DATE,
+    status ENUM('PAGO', 'PENDENTE', 'ATRASADO') NOT NULL,
+    id_matricula INT NOT NULL,
+    FOREIGN KEY (id_matricula) REFERENCES matricula(id)
+);
+
+CREATE TABLE turma_materia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_turma INT NOT NULL,
+    id_materia INT NOT NULL,
+    id_professor INT NOT NULL,
+    FOREIGN KEY (id_turma) REFERENCES turma(id),
+    FOREIGN KEY (id_materia) REFERENCES materia(id),
+    FOREIGN KEY (id_professor) REFERENCES professor(id_pessoa)
 );
